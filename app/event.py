@@ -1,31 +1,45 @@
-from typing import Type
-
+import asyncio
 from telebot.async_telebot import AsyncTeleBot
 from telebot import types
-from utils.base import join_request_details
 
 
-async def start(bot: AsyncTeleBot, message: types.Message, config):
-    await bot.reply_to(message, config.about)
+async def start(bot: AsyncTeleBot, message: types.Message):
+    await bot.reply_to(message, "Hello, I'm a bot")
 
 
-async def help(bot: AsyncTeleBot, message: types.Message, config):
-    await bot.reply_to(message, config.help)
+async def help(bot: AsyncTeleBot, message: types.Message):
+    await bot.reply_to(message, "A simple bot. Code: github.com/KanaMiao/TGVoteToJoinBot")
 
 
-async def get_join_request_details(message: types.ChatJoinRequest) -> join_request_details:
-    user_id = message.from_user.id
-    chat_id = message.chat.id
-    return join_request_details(user=user_id, chat=chat_id)
-
-
-async def send_poll(bot: AsyncTeleBot, message: join_request_details, config):
-    await bot.send_poll(message.chat, config.poll_question, config.poll_options, is_anonymous=True)
-
-
-async def approve_join_request(bot: AsyncTeleBot, message: join_request_details):
-    await bot.approve_chat_join_request(message.user, message.chat)
-
-
-async def decline_join_request(bot: AsyncTeleBot, message: join_request_details):
-    await bot.decline_chat_join_request(message.user, message.chat)
+async def new_request(bot: AsyncTeleBot, request: types.ChatJoinRequest):
+    user_id = request.from_user.id
+    user_nickname = request.from_user.first_name
+    polling = await bot.send_poll(request.chat.id,
+                                  f"Approve {user_nickname}({user_id}) 's Join Request?",
+                                  ["Approve", "Decline"],
+                                  is_anonymous=True,
+                                  allows_multiple_answers=False,
+                                  )
+    await asyncio.sleep(300)
+    poll_msg_id = polling.message_id
+    polling = await bot.stop_poll(request.chat.id, poll_msg_id)
+    if polling.total_voter_count == 0:
+        await bot.send_message(request.chat.id, "No one vote, request rejected", reply_to_message_id=poll_msg_id)
+        await bot.send_message(user_id, "No one vote. Your request has been rejected")
+        await bot.decline_chat_join_request(request.chat.id, request.from_user.id)
+    elif polling.options[0].voter_count > polling.options[1].voter_count:
+        await bot.send_message(request.chat.id, "Approved", reply_to_message_id=poll_msg_id)
+        await bot.send_message(user_id, "Your request has been approved")
+        await bot.approve_chat_join_request(request.chat.id, request.from_user.id)
+    elif polling.options[1].voter_count > polling.options[0].voter_count:
+        await bot.send_message(request.chat.id, "Declined", reply_to_message_id=poll_msg_id)
+        await bot.send_message(user_id, "Your request has been declined")
+        await bot.decline_chat_join_request(request.chat.id, request.from_user.id)
+    elif polling.options[0].voter_count == polling.options[1].voter_count:
+        await bot.send_message(request.chat.id, "Tie", reply_to_message_id=poll_msg_id)
+        await bot.send_message(user_id, "Your request has been declined")
+        await bot.decline_chat_join_request(request.chat.id, request.from_user.id)
+    else:
+        await bot.send_message(request.chat.id, "Error", reply_to_message_id=poll_msg_id)
+        await bot.send_message(user_id, "Error")
+        await bot.decline_chat_join_request(request.chat.id, request.from_user.id)
