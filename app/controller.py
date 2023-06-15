@@ -5,8 +5,6 @@ from telebot import  util
 from telebot.async_telebot import AsyncTeleBot
 from telebot.asyncio_storage import StateMemoryStorage
 
-from app import event
-
 
 class BotRunner(object):
     def __init__(self, config):
