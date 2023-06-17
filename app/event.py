@@ -11,7 +11,7 @@ async def cmd_start(bot: AsyncTeleBot, message: types.Message):
 async def cmd_help(bot: AsyncTeleBot, message: types.Message):
     await bot.reply_to(
         message,
-        "A simple bot. Code: github.com/KanaMiao/TGVoteToJoinBot",
+        "A simple bot. Code: https://github.com/KanaMiao/TGVoteToJoinBot",
         disable_web_page_preview=True,
     )
 
