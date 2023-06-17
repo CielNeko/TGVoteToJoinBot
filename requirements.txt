@@ -2,3 +2,4 @@ pyTelegramBotAPI
 loguru
 rtoml
 pathlib
+aiohttp
