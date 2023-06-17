@@ -27,11 +27,16 @@ class BotRunner(object):
         @bot.message_handler(commands=["start", "help"], chat_types=['private'])
         async def handle_command(message):
             if "/start" in message.text:
-                await event.start(bot, message, _config)
+                await event.cmd_start(bot, message)
             elif "/help" in message.text:
-                await event.help(bot, message, _config)
+                await event.cmd_help(bot, message)
 
         # 加群事件捕获与处理
         @bot.chat_join_request_handler
         async def new_join_request(message):
             await event.new_request(bot, message, _config)
+
+        async def main():
+            await asyncio.gather(bot.polling(non_stop=True, allowed_updates=util.update_types))
+
+        asyncio.run(main())

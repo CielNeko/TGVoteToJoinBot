@@ -1,17 +1,22 @@
 import asyncio
+from loguru import logger
 from telebot.async_telebot import AsyncTeleBot
 from telebot import types
 
 
-async def start(bot: AsyncTeleBot, message: types.Message):
+async def cmd_start(bot: AsyncTeleBot, message: types.Message):
     await bot.reply_to(message, "Hello, I'm a bot")
 
 
-async def help(bot: AsyncTeleBot, message: types.Message):
-    await bot.reply_to(message, "A simple bot. Code: github.com/KanaMiao/TGVoteToJoinBot")
+async def cmd_help(bot: AsyncTeleBot, message: types.Message):
+    await bot.reply_to(
+        message,
+        "A simple bot. Code: github.com/KanaMiao/TGVoteToJoinBot",
+        disable_web_page_preview=True,
+    )
 
 
-async def new_request(bot: AsyncTeleBot, request: types.ChatJoinRequest):
+async def new_request(bot: AsyncTeleBot, request: types.ChatJoinRequest, config):
     user_id = request.from_user.id
     user_nickname = request.from_user.first_name
     polling = await bot.send_poll(request.chat.id,
