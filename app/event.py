@@ -20,7 +20,7 @@ async def new_request(bot: AsyncTeleBot, request: types.ChatJoinRequest, config)
     user_id = request.from_user.id
     user_nickname = request.from_user.first_name
     msg = await bot.send_message(request.chat.id,
-                                 f"New request from [{user_nickname}](tg://openmessage?user_id={user_id})",
+                                 f"New request from [{user_nickname}](tg://user?id={user_id})",
                                  parse_mode="MarkdownV2",)
     polling = await bot.send_poll(request.chat.id,
                                   f"Approve this request?",
