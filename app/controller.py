@@ -33,7 +33,6 @@ class BotRunner(object):
 
         @bot.chat_join_request_handler()
         async def new_join_request(request):
-            logger.info("New Join Request")
             await event.new_request(bot, request, _config)
 
         async def main():
