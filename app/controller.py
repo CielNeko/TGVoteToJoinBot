@@ -31,10 +31,10 @@ class BotRunner(object):
             elif "/help" in message.text:
                 await event.cmd_help(bot, message)
 
-        # 加群事件捕获与处理
-        @bot.chat_join_request_handler
-        async def new_join_request(message):
-            await event.new_request(bot, message, _config)
+        @bot.chat_join_request_handler()
+        async def new_join_request(request):
+            logger.info("New Join Request")
+            await event.new_request(bot, request, _config)
 
         async def main():
             await asyncio.gather(bot.polling(non_stop=True, allowed_updates=util.update_types))
