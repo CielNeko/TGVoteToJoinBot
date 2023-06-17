@@ -1,4 +1,5 @@
 import asyncio
+import telebot
 from loguru import logger
 from telebot.async_telebot import AsyncTeleBot
 from telebot import types
@@ -19,9 +20,14 @@ async def cmd_help(bot: AsyncTeleBot, message: types.Message):
 async def new_request(bot: AsyncTeleBot, request: types.ChatJoinRequest, config):
     user_id = request.from_user.id
     user_nickname = request.from_user.first_name
+    inline_button = telebot.types.InlineKeyboardButton(text='See the applicant', url=f'tg://openmessage?user_id={user_id}')
+    inline_keyboard = telebot.types.InlineKeyboardMarkup()
+    inline_keyboard.add(inline_button)
     msg = await bot.send_message(request.chat.id,
-                                 f"New request from [{user_nickname}](tg://user?id={user_id})",
-                                 parse_mode="MarkdownV2",)
+                                 f"New request from {user_nickname}",
+                                 parse_mode="MarkdownV2",
+                                 reply_markup=inline_keyboard,
+                                 )
     polling = await bot.send_poll(request.chat.id,
                                   f"Approve this request?",
                                   ["Approve", "Decline"],
